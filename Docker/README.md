@@ -8,6 +8,10 @@ Inside this `Docker` directory
 
 # Start the environment
 
+You need to be set the `DOCKER_HOST_IP` environmental variable, easies way for it for example:
+Add this line into your `.bashrc` file
+> `export DOCKER_HOST_IP=$(/sbin/ip route|awk '/docker0/ { print $9 }')`
+
 ## Build with ./build.sh
 
 ## Start with ./start.sh
