@@ -1,0 +1,133 @@
+version: '3.7'
+
+services:
+  httpd:
+    hostname: httpd
+    build:
+      context: ./httpd
+      args:
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - HOST=${HOST}
+        - TIMEZONE=${TIMEZONE}
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.docker.network=traefik
+      - traefik.frontend.rule=Host:${HOST}
+    environment:
+      - APPLICATION_ENV=${APPLICATION_ENV}
+    extra_hosts:
+      - "${HOST}:${DOCKER_HOST_IP}"
+    volumes:
+      - ${CODE}:/var/www
+    depends_on:
+      - php-fpm
+    networks:
+      - laravel_net
+      - traefik
+
+  php-fpm:
+    hostname: php-fpm
+    build:
+      context: ./php-fpm
+      args:
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - TIMEZONE=${TIMEZONE}
+    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
+    extra_hosts:
+      - "${HOST}:${DOCKER_HOST_IP}"
+    volumes:
+      - ${CODE}:/var/www
+    environment:
+      - APPLICATION_ENV=${APPLICATION_ENV}
+    labels:
+      - traefik.enable=false
+    networks:
+      - laravel_net
+
+# majd ha kell cron, akkor meg kell csinálni rendesen
+#  php-cli:
+#    hostname: php-cli
+#    build:
+#      context: ./php-cli
+#      args:
+#        - HOST_UID=${HOST_UID}
+#        - HOST_GID=${HOST_GID}
+#        - TIMEZONE=${TIMEZONE}
+#    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
+#    extra_hosts:
+#      - "${HOST}:${DOCKER_HOST_IP}"
+#    volumes:
+#      - ${CODE}:/var/www
+#    environment:
+#      - APPLICATION_ENV=${APPLICATION_ENV}
+#    labels:
+#      - traefik.enable=false
+#    networks:
+#      - laravel_net
+
+      
+  database:
+    hostname: database
+    build:
+      context: ./mariadb
+      args:
+        - TIMEZONE=${TIMEZONE}
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    labels:
+      - traefik.enable=false
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - laravel_net
+      
+      
+  phpmyadmin:
+    hostname: phpmyadmin
+    build:
+      context: ./phpmyadmin
+      args:
+        - TIMEZONE=${TIMEZONE}
+    environment:
+      - PMA_HOST=database
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.docker.network=traefik
+      - traefik.frontend.rule=Host:pma.${HOST}
+    depends_on:
+      - database
+    networks:
+      - laravel_net
+      - traefik
+
+
+  cache:
+    hostname: cache
+    restart: unless-stopped
+    build:
+      context: ./cache
+    command:
+      - "-m 16"
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - laravel_net
+
+
+volumes:
+#  redisdata:
+#    driver: local
+  mysqldata:
+    driver: local
+
+
+networks:
+  laravel_net:
+    driver: bridge
+  traefik:
+    external: true
+
