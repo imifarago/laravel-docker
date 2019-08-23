@@ -4,6 +4,9 @@ Totally independent project from the Laravel developers!
 
 # First steps
 
+## Read the README in the Docker/ subfolder
+And don't forget to clone the traefik repository
+
 ## copy .env.example to .env and fill / add / modify variables
 The host for mysql and memcached are set for the Docker environment
 
