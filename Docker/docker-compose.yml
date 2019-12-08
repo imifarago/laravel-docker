@@ -27,6 +27,7 @@ services:
       - laravel_net
       - traefik
 
+
   php-fpm:
     hostname: php-fpm
     build:
@@ -47,28 +48,7 @@ services:
     networks:
       - laravel_net
 
-# majd ha kell cron, akkor meg kell csinálni rendesen
-#  php-cli:
-#    hostname: php-cli
-#    build:
-#      context: ./php-cli
-#      args:
-#        - HOST_UID=${HOST_UID}
-#        - HOST_GID=${HOST_GID}
-#        - TIMEZONE=${TIMEZONE}
-#    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
-#    extra_hosts:
-#      - "${HOST}:${DOCKER_HOST_IP}"
-#    volumes:
-#      - ${CODE}:/var/www
-#    environment:
-#      - APPLICATION_ENV=${APPLICATION_ENV}
-#    labels:
-#      - traefik.enable=false
-#    networks:
-#      - laravel_net
 
-      
   database:
     hostname: database
     build:
@@ -83,8 +63,25 @@ services:
       - mysqldata:/var/lib/mysql
     networks:
       - laravel_net
-      
-      
+
+
+  mongo:
+    hostname: mongo
+    build:
+      context: ./mongo
+      args:
+        - TIMEZONE=${TIMEZONE}
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    labels:
+      - traefik.enable=false
+    volumes:
+      - mongodata:/var/lib/mongodb
+    networks:
+      - laravel_net
+
+
   phpmyadmin:
     hostname: phpmyadmin
     build:
@@ -118,10 +115,25 @@ services:
       - laravel_net
 
 
+  redis:
+    hostname: redis
+    restart: unless-stopped
+    build:
+      context: ./redis
+    volumes:
+      - redisdata:/var/lib/redis
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - laravel_net
+
+
 volumes:
-#  redisdata:
-#    driver: local
+  redisdata:
+    driver: local
   mysqldata:
+    driver: local
+  mongodata:
     driver: local
 
 

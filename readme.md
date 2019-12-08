@@ -1,5 +1,5 @@
 # https://github.com/imifarago/laravel-docker
-It's a totally clear unmodifier Laravel 5.8 with my own Docker container support in the Docker/ subfolder.
+It's a totally clear unmodified Laravel 6.x with my own Docker container support in the Docker/ subfolder.
 Totally independent project from the Laravel developers!
 
 # First steps
@@ -8,7 +8,7 @@ Totally independent project from the Laravel developers!
 And don't forget to clone the traefik repository
 
 ## copy .env.example to .env and fill / add / modify variables
-The host for mysql and memcached are set for the Docker environment
+The host for mysql and memcached/redis are set for the Docker environment
 
 ## Edit configs
 In the Laravel's config/ subfolder

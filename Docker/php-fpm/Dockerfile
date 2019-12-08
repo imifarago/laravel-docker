@@ -31,7 +31,17 @@ RUN docker-php-ext-enable memcached \
     && docker-php-ext-configure pdo_mysql --with-pdo-mysql \
     && docker-php-ext-install intl iconv pdo_mysql mysqli mbstring zip soap gd
 
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y \
+    libssl1.1 \
+    libssl-dev
+
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb
+
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
+RUN rm -rf /var/lib/apt/lists/* && rm -rf /tmp/pear/*
 
 USER root
 ARG TIMEZONE
@@ -48,10 +58,6 @@ RUN sed -i "s/#SMARTHOST/SMARTHOST $MAIL_SMTP_SERVER/g" /etc/dma/dma.conf; \
         sed -i "s/#AUTHPATH/AUTHPATH/g" /etc/dma/dma.conf; \
         echo "$MAIL_AUTH_USER|$MAIL_SMTP_SERVER:$MAIL_AUTH_PASS" >> /etc/dma/auth.conf; \
     fi;
-
-#RUN pecl install redis-3.1.0 \
-#    && pecl install xdebug-2.5.0 \
-#    && docker-php-ext-enable redis xdebug
 
 WORKDIR /usr/local/etc/php-fpm.d
 RUN if [ "$PHP_LOG_LEVEL" != "" ]; then sed -i "s/;log_level = .*/&\nlog_level = $PHP_LOG_LEVEL/g" www.conf; fi && \
