@@ -1,7 +1,7 @@
 # Requirements
 ## Clone my traefik repository
 https://github.com/imifarago/traefik-docker
-Add the `traefik` network interface
+Add the `web` network interface in docker
 
 ## Copy .env.example to .env and fill / modify the variables
 Inside this `Docker` directory
@@ -29,7 +29,7 @@ Hostname: cache
 
 ## Redis
 Hostname: redis
-Own volume
+Own volume /var/lib/redis
 
 # Start the environment
 
