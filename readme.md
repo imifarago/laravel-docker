@@ -1,5 +1,5 @@
 # https://github.com/imifarago/laravel-docker
-It's a totally clear unmodified Laravel 6.x with my own Docker container support in the Docker/ subfolder.
+It's a totally clear unmodified Laravel 7.x with my own Docker container support in the Docker/ subfolder.
 Totally independent project from the Laravel developers!
 
 # First steps
