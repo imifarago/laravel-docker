@@ -11,10 +11,11 @@ services:
         - HOST=${HOST}
         - TIMEZONE=${TIMEZONE}
     labels:
-      - traefik.enable=true
-      - traefik.port=80
-      - traefik.docker.network=traefik
-      - traefik.frontend.rule=Host:${HOST}
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.${PROJECT_SLUG}.entrypoints=http"
+      - "traefik.http.routers.${PROJECT_SLUG}.rule=Host(`${HOST}`)"
     environment:
       - APPLICATION_ENV=${APPLICATION_ENV}
     extra_hosts:
@@ -25,8 +26,7 @@ services:
       - php-fpm
     networks:
       - laravel_net
-      - traefik
-
+      - web
 
   php-fpm:
     hostname: php-fpm
@@ -44,9 +44,30 @@ services:
     environment:
       - APPLICATION_ENV=${APPLICATION_ENV}
     labels:
-      - traefik.enable=false
+      - "traefik.enable=false"
     networks:
       - laravel_net
+
+# majd ha kell cron, akkor meg kell csinálni rendesen
+#  php-cli:
+#    hostname: php-cli
+#    build:
+#      context: ./php-cli
+#      args:
+#        - HOST_UID=${HOST_UID}
+#        - HOST_GID=${HOST_GID}
+#        - TIMEZONE=${TIMEZONE}
+#    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
+#    extra_hosts:
+#      - "${HOST}:${DOCKER_HOST_IP}"
+#    volumes:
+#      - ${CODE}:/var/www
+#    environment:
+#      - APPLICATION_ENV=${APPLICATION_ENV}
+#    labels:
+#      - traefik.enable=false
+#    networks:
+#      - laravel_net
 
 
   database:
@@ -58,7 +79,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     labels:
-      - traefik.enable=false
+      - "traefik.enable=false"
     volumes:
       - mysqldata:/var/lib/mysql
     networks:
@@ -75,7 +96,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     labels:
-      - traefik.enable=false
+      - "traefik.enable=false"
     volumes:
       - mongodata:/var/lib/mongodb
     networks:
@@ -91,15 +112,16 @@ services:
     environment:
       - PMA_HOST=database
     labels:
-      - traefik.enable=true
-      - traefik.port=80
-      - traefik.docker.network=traefik
-      - traefik.frontend.rule=Host:pma.${HOST}
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.${PROJECT_SLUG}-pma.entrypoints=http"
+      - "traefik.http.routers.${PROJECT_SLUG}-pma.rule=Host(`pma.${HOST}`)"
     depends_on:
       - database
     networks:
       - laravel_net
-      - traefik
+      - web
 
 
   cache:
@@ -140,6 +162,5 @@ volumes:
 networks:
   laravel_net:
     driver: bridge
-  traefik:
+  web:
     external: true
-
